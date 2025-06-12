@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FlatFileGenerator.Core.Models.Nets.NetsInfo
+﻿namespace FlatFileGenerator.Core.Models.Nets.NetsInfo
 {
     public class InfoRecordChild : InfoRecordBase
     {
