@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Upload";
+}
+
+<h2>Upload File</h2>
+<p>&nbsp;</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <section>
+            <h3>
+                Uploading a receiptDetail file
+            </h3>
+            <form asp-action="Uploadfile" method="post" enctype="multipart/form-data" class="form-horizontal" role="form">
+                <p>Select file:</p>
+                <div class="form-group">
+                    <div class="col-md-10">
+                        <input type="file" class="btn btn-default" name="file" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-default">OK</button>
+            </form>
+            <p></p>
+            &nbsp;
+        </section>
+    </div>
+</div>

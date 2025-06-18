@@ -1,0 +1,23 @@
+﻿<div class="text-center">
+    <h1 class="display-4">Administration</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <section>
+            <form asp-action="ExportToFile">
+                <div class="form-group">
+                    <label >Filename: </label>
+                    <input type ="text" name="fileName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label >FilePath: </label>
+                    <input type="text" name="filePath" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Export to file" class="btn btn-primary" />
+                </div>
+            </form>
+        </section>
+    </div>
+</div>

@@ -1,11 +1,12 @@
 ﻿using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.DataAccess.Interfaces;
+using FlatFileGenerator.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FlatFileGenerator.DataAccess.Repositories
 {
-    public class GuidRepositoryBase<T1>(DbContext context, ILogger<GuidRepositoryBase<T1>> logger) : IGuidRepository<T1>
+    public class GuidRepositoryBase<T1>(FlatFileContext context, ILogger<GuidRepositoryBase<T1>> logger) : IGuidRepository<T1>
         where T1 : Entity<Guid>
     {
         public IQueryable<T1> GetQueryList()
@@ -13,10 +14,9 @@ namespace FlatFileGenerator.DataAccess.Repositories
             return Query();
         }
 
-        public IEnumerable<T1> GetList(int take = 100)
+        public async Task<IEnumerable<T1>> GetList(int take = 100)
         {
-            var entities = Query(true).Take(take).ToList();
-            return entities;
+            return await context.Set<T1>().ToListAsync();
         }
 
         public T1? Get(Guid id)
@@ -31,6 +31,14 @@ namespace FlatFileGenerator.DataAccess.Repositories
         {
             context.Add(entity);
             context.SaveChanges();
+        }
+
+        public async Task AddRange(IEnumerable<T1> entities)
+        {
+            if (entities == null || !entities.Any())
+                throw new ArgumentException("No entities to add");
+            await context.AddRangeAsync(entities);
+            await context.SaveChangesAsync();
         }
 
         public void Delete(Guid id)

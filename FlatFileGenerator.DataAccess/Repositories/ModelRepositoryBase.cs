@@ -1,11 +1,12 @@
 ﻿using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.DataAccess.Interfaces;
+using FlatFileGenerator.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FlatFileGenerator.DataAccess.Repositories
 {
-    public class ModelRepositoryBase<T1>(DbContext context, ILogger<ModelRepositoryBase<T1>> logger)
+    public class ModelRepositoryBase<T1>(FlatFileContext context, ILogger<ModelRepositoryBase<T1>> logger)
         : IRepository<T1, long>
         where T1 : Entity<long>
     {

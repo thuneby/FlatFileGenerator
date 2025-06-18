@@ -2,6 +2,7 @@
 using FlatFileGenerator.DataAccess.Repositories;
 using FlatFileGenerator.Test.Common;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace FlatFileGenerator.Test.RepositoryTests
 {
@@ -51,19 +52,40 @@ namespace FlatFileGenerator.Test.RepositoryTests
         }
 
         [Fact]
-        public void GetReceiptDetailList()
+        public async Task GetReceiptDetailList()
         {
             // Arrange
             _repository.Add(_receiptDetail);
 
             // Act
-            var receiptDetails = _repository.GetList(10).ToList();
+            var receiptDetails = await _repository.GetList(10);
 
             // Assert
             Assert.NotEmpty(receiptDetails);
             Assert.Single(receiptDetails);
             Assert.Contains(receiptDetails, rd => rd.Id == _receiptDetail.Id);
             Assert.Equal(_receiptDetail.Amount, receiptDetails.First(rd => rd.Id == _receiptDetail.Id).Amount);
+        }
+
+        [Fact]
+        public async Task AddReceiptDetailList()
+        {
+            // Arrange
+            const string testData = "receiptdetails_small.json";
+            var blob = await TestUtil.ReadFileAsync(testData);
+            using MemoryStream ms = new MemoryStream(blob);
+            var receiptDetails = await JsonSerializer.DeserializeAsync<ReceiptDetail[]>(ms);
+
+            // Act
+            if (receiptDetails != null)
+            {
+                await _repository.AddRange(receiptDetails);
+            }
+
+            // Assert
+            var allReceiptDetails = (await _repository.GetList()).ToList();
+            Assert.NotEmpty(allReceiptDetails);
+            Assert.Equal(receiptDetails?.Length, allReceiptDetails.Count);
         }
     }
 }

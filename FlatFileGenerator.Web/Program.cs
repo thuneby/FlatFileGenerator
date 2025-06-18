@@ -12,6 +12,7 @@ builder.Services.AddDbContext<FlatFileContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("FlatFileGenerator.Web")));
 
+builder.Services.AddScoped<ReceiptDetailRepository>();
 //builder.Services.AddDatabaseDeveloper
 
 var app = builder.Build();
