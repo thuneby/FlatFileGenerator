@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FlatFileGenerator.Core.Models;
+﻿using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.DataAccess.Repositories;
 using FlatFileGenerator.Test.Common;
 using Microsoft.Extensions.Logging;

@@ -1,11 +1,22 @@
+using FlatFileGenerator.Core.Models;
+using FlatFileGenerator.DataAccess.Models;
+using FlatFileGenerator.DataAccess.Repositories;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddDbContext<FlatFileContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("FlatFileGenerator.Web")));
+
+//builder.Services.AddDatabaseDeveloper
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline.½½
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
