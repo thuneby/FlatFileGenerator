@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatFileGenerator.DataAcces
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatFileGenerator.Test", "FlatFileGenerator.Test\FlatFileGenerator.Test.csproj", "{3C88DA1D-2096-4CC5-BF2B-35643BC32279}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatFileGenerator.FileWriter", "FlatFileGenerator.FileWriter\FlatFileGenerator.FileWriter.csproj", "{C9BB1F55-999F-47F3-A07A-C2AF6D32CA08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{3C88DA1D-2096-4CC5-BF2B-35643BC32279}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C88DA1D-2096-4CC5-BF2B-35643BC32279}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C88DA1D-2096-4CC5-BF2B-35643BC32279}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9BB1F55-999F-47F3-A07A-C2AF6D32CA08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9BB1F55-999F-47F3-A07A-C2AF6D32CA08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9BB1F55-999F-47F3-A07A-C2AF6D32CA08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9BB1F55-999F-47F3-A07A-C2AF6D32CA08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
