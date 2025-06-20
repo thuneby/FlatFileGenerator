@@ -1,13 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FileHelpers;
 
 namespace FlatFileGenerator.Core.Models.Nets.NetsInfoRW
 {
-    public class NetsBase
+    public class NetsBase: TextModelBase
     {
-        [StringLength(2)]
-        public string SYSTEM_KOD { get; set; }
+        [FieldFixedLength(2)] public string SYSTEM_KOD;
 
-        [StringLength(3)]
-        public string TRANS_TYPE { get; set; }
+        [FieldFixedLength(3)] public string TRANS_TYPE;
     }
 }
