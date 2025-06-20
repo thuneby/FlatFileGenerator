@@ -84,7 +84,7 @@ namespace FlatFileGenerator.Web.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> ExportToFile(string fileName, string filePath)
+        public async Task<IActionResult> ExportToFile(string fileName, string filePath, int type)
         {
             if (string.IsNullOrEmpty(fileName))
             {
