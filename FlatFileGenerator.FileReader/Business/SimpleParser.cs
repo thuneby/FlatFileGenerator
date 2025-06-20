@@ -12,10 +12,10 @@ namespace FlatFileGenerator.FileReader.Business
         where T2 : GuidModelBase
     {
 
-        public async Task<IEnumerable<ReceiptDetail>> ParseAsync(Stream s, DocumentType documentType)
+        public async Task<IEnumerable<ReceiptDetail>> ParseAsync(Stream payload, DocumentType documentType)
         {
-            var (textRecords, errors) = flatParserHelper.GetRecordsFromPayload(s, documentType);
-            var recordList = textRecords.ToList();
+            var (textRecords, errors) = flatParserHelper.GetRecordsFromPayload(payload, documentType);
+            var recordList = textRecords?.ToList() ?? [];
             var errorList = errors.ToList();
             if (errorList.Any())
             {

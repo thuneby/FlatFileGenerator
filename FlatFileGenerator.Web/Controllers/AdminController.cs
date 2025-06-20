@@ -9,6 +9,7 @@ using Microsoft.Net.Http.Headers;
 using System.Reflection.Metadata;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FlatFileGenerator.FileReader.Business;
 
 namespace FlatFileGenerator.Web.Controllers
 {
@@ -26,9 +27,9 @@ namespace FlatFileGenerator.Web.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> UploadFile(IFormFile file)
+        public async Task<IActionResult> UploadFile(IFormFile file, int type)
         {
-            if (file.Length is <= 0 or > int.MaxValue)
+            if (file.Length is <= 0 or > long.MaxValue)
             {
                 ModelState.AddModelError("file", "File is empty or too large.");
                 return View("Index");
@@ -48,28 +49,28 @@ namespace FlatFileGenerator.Web.Controllers
                 content = reader.ReadBytes((int)file.Length);
             }
 
+            var documentType = (DocumentType) type;
+            var parser = ParserFactory.GetParser(documentType);
             var filetype = file.ContentType.ToLowerInvariant();
 
-            if (filetype.Contains("json"))
+
+            try
             {
-                try
+                using var payload = new MemoryStream(content);
+                var receiptDetails = (await parser.ParseAsync(payload, documentType)).ToList();
+                if (receiptDetails.Any())
                 {
-                    using var ms = new MemoryStream(content);
-                    var receiptDetails = await JsonSerializer.DeserializeAsync<ReceiptDetail[]>(ms);
-                    if (receiptDetails != null && receiptDetails.Any())
-                    {
-                        await repository.AddRange(receiptDetails.ToList());
-                    }
-
-                    return RedirectToAction("Index", "ReceiptDetail");
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("file", $"JSON deserialization error: {ex.Message}");
-                    return View("Index");
+                    await repository.AddRange(receiptDetails.ToList());
                 }
 
+                return RedirectToAction("Index", "ReceiptDetail");
             }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("file", $"JSON deserialization error: {ex.Message}");
+                return View("Index");
+            }
+
 
             var result = "File uploaded";
 

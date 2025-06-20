@@ -10,6 +10,7 @@ namespace FlatFileGenerator.FileReader.Business.Mappers
         public IpRecordMapper()
         {
             MapperConfiguration = GetMapperConfiguration();
+            Mapper = MapperConfiguration.CreateMapper();
         }
 
         private MapperConfiguration GetMapperConfiguration()

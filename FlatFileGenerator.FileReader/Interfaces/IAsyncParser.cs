@@ -4,6 +4,6 @@ namespace FlatFileGenerator.FileReader.Interfaces
 {
     public interface IAsyncParser
     {
-        Task<IEnumerable<ReceiptDetail>> ParseAsync(Stream reader, DocumentType documentType);
+        Task<IEnumerable<ReceiptDetail>> ParseAsync(Stream payload, DocumentType documentType); 
     }
 }
