@@ -93,23 +93,15 @@ namespace FlatFileGenerator.Web.Controllers
                 return View("Export");
             }
 
-            var receiptDetails = await repository.GetList();
+            var receiptDetails = (await repository.GetList()).ToList();
             if (!receiptDetails.Any())
             {
                 ModelState.AddModelError("fileName", "No data available to export.");
                 return View("Export");
             }
 
-            var jsonString = JsonSerializer.Serialize(receiptDetails.ToList(), new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-
-            });
-
-            var util = new FileUtil();
-            var success = await util.WriteFileAsync(jsonString, fileName, filePath);
+            var writer = WriterFactory.GetWriter((DocumentType)type);
+            var success = await writer.WriteAsync(receiptDetails, fileName, filePath);
 
             return new ObjectResult("Export successful!");
         }
