@@ -8,8 +8,9 @@ namespace FlatFileGenerator.FileWriter.Business
     {
         public async Task<bool> WriteAsync(IEnumerable<ReceiptDetail> recordList, string fileName, string filePath)
         {
-            var (netsModel,totalAmount) = CreateNetsIs.CreateNetsModel(recordList.ToList(), batchNumber, bankAccount);
-            var payload = CreateNetsIs.CreatePayload(netsModel);
+            var creator = new CreateNetsIs();
+            var (netsModel,totalAmount) = creator.CreateNetsModel(recordList.ToList(), batchNumber, bankAccount);
+            var payload = creator.CreatePayload(netsModel);
             await WritePayloadToFile(payload, fileName, filePath);
             return true;
         }

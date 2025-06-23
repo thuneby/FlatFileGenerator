@@ -1,11 +1,23 @@
-﻿using FlatFileGenerator.Core.Models.Nets.NetsInfo;
+﻿using System.Text;
+using FileHelpers;
+using FlatFileGenerator.Core.Models.Nets.NetsInfo;
 using FlatFileGenerator.Core.Models;
+using FlatFileGenerator.Core.Models.Nets.NetsInfoRW;
+using FlatFileGenerator.FileWriter.Business.Mappers;
 
 namespace FlatFileGenerator.FileWriter.Business.Helpers
 {
     public class CreateNetsIs
     {
-        public static (InfoStart, decimal) CreateNetsModel(List<ReceiptDetail> recordList, string batchNumber,
+        private readonly InfoStartMapper _infoStartMapper = new InfoStartMapper();
+        private readonly InfoEndMapper _infoEndMapper = new InfoEndMapper();
+        private readonly InfoSectionStartMapper _infoSectionStartMapper = new InfoSectionStartMapper();
+        private readonly InfoSectionEndMapper _infoSectionEndMapper = new InfoSectionEndMapper();
+        private readonly InfoRecord00Mapper _infoRecord00Mapper = new InfoRecord00Mapper();
+        private readonly InfoRecord01Mapper _infoRecord01Mapper = new InfoRecord01Mapper();
+        private readonly InfoRecord02Mapper _infoRecord02Mapper = new InfoRecord02Mapper();
+
+        public (InfoStart, decimal) CreateNetsModel(List<ReceiptDetail> recordList, string batchNumber,
             string bankAccount)
         {
             var batchDate = DateTime.Today.ToString("yyyyMMdd");
@@ -70,9 +82,59 @@ namespace FlatFileGenerator.FileWriter.Business.Helpers
             return record00;
         }
 
-        public static byte[] CreatePayload(InfoStart netsModel)
+        public byte[] CreatePayload(InfoStart netsModel)
         {
-            throw new NotImplementedException();
+            var records = GetNetsBaseRecords(netsModel);
+            return CreatePayloadfromNetsRecords(records);
+        }
+
+        private IEnumerable<NetsBase> GetNetsBaseRecords(InfoStart netsModel)
+        {
+            var records = new HashSet<NetsBase> { _infoStartMapper.GetRecord(netsModel) };
+            foreach (var section in netsModel.InfoSectionStartRecords)
+            {
+                records.Add(_infoSectionStartMapper.GetRecord(section));
+                foreach (var innnerRecord in GetInnerRecords(section))
+                {
+                    records.Add(innnerRecord);
+                }
+                records.Add(_infoSectionEndMapper.GetRecord(section.InfoSectionEnd.FirstOrDefault()));
+            }
+            records.Add(_infoEndMapper.GetRecord(netsModel.InfoEnd.FirstOrDefault()));
+            return records;
+        }
+
+        private IEnumerable<NetsBase> GetInnerRecords(InfoSectionStart section)
+        {
+            var baseRecords = new HashSet<NetsBase>();
+            foreach (var record00 in section.Record00Records)
+            {
+                baseRecords.Add(_infoRecord00Mapper.GetRecord(record00));
+                foreach (var i01 in record00.InfoRecord01)
+                    baseRecords.Add(_infoRecord01Mapper.GetRecord(i01));
+                foreach (var i02 in record00.InfoRecord02)
+                    baseRecords.Add(_infoRecord02Mapper.GetRecord(i02));
+            }
+            return baseRecords;
+        }
+
+
+        private static byte[] CreatePayloadfromNetsRecords(IEnumerable<NetsBase> records)
+        {
+            var engine = new MultiRecordEngine(typeof(InfoStartRecord),
+                    typeof(InfoSectionStartRecord), typeof(InfoRecordFixed00),
+                    typeof(InfoRecordFixed01), typeof(InfoRecordFixed02),
+                    typeof(InfoRecordFixed03), typeof(InfoRecordFixed04),
+                    typeof(InfoRecordFixed05), typeof(InfoRecordFixed10),
+                    typeof(InfoSectionEndRecord), typeof(InfoEndRecord))
+                { Encoding = Encoding.Default };
+
+            byte[] result;
+            using var stream = new MemoryStream();
+            var streamWriter = new StreamWriter(stream, Encoding.Default) { AutoFlush = true };
+            engine.WriteStream(streamWriter, records);
+            result = stream.ToArray();
+            return result;
         }
     }
 }
