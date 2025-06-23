@@ -15,4 +15,9 @@
     <ProjectReference Include="..\FlatFileGenerator.Core\FlatFileGenerator.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Business\Mappers\" />
+    <Folder Include="Mappers\" />
+  </ItemGroup>
+
 </Project>

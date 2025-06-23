@@ -2,6 +2,7 @@
 using FlatFileGenerator.FileWriter.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FlatFileGenerator.FileWriter.Business.Helpers;
 
 namespace FlatFileGenerator.FileWriter.Business
 {

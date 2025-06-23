@@ -1,10 +1,10 @@
-﻿namespace FlatFileGenerator.FileWriter.Business
+﻿namespace FlatFileGenerator.FileWriter.Business.Helpers
 {
     public class FileUtil
     {
         public async Task<byte[]> UploadFile(string fileName, string path) 
         {
-            var fullPath = System.IO.Path.Combine(path, fileName);
+            var fullPath = Path.Combine(path, fileName);
             var fileInfo = new FileInfo(fullPath);
             var content = new byte[fileInfo.Length];
             await using var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
@@ -54,6 +54,17 @@
                 // Handle exceptions such as access denied, disk full, etc.
                 throw new IOException($"Error writing to file at {fullPath}", ex);
             }
+            return true;
+        }
+
+        public async Task<bool> WriteFileAsync(byte[] payload, string fileName, string filePath = "C:\\Temp")
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentException("File path cannot be null or empty.", nameof(fileName));
+            }
+            var fullPath = Path.Combine(filePath, fileName);
+            await File.WriteAllBytesAsync(fullPath, payload);
             return true;
         }
 
