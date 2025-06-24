@@ -16,6 +16,7 @@ namespace FlatFileGenerator.FileReader.Business
                 case DocumentType.IpStandard:
                     return new IpStandardParser(new IpStandardParserHelper(), new IpStandardMapper(), new IpRecordMapper());
                 case DocumentType.NetsIs:
+                    return new NetsIsParser();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(documentType), documentType, null);
             }
