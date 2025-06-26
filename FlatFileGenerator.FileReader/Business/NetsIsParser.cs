@@ -10,23 +10,6 @@ namespace FlatFileGenerator.FileReader.Business
 {
     public class NetsIsParser: IAsyncParser
     {
-        private static readonly Dictionary<string, Type> InfoRecordDictionary = new Dictionary<string, Type>
-        {
-            {"00", typeof(InfoRecordFixed00)},
-            {"01", typeof(InfoRecordFixed01)},
-            {"02", typeof(InfoRecordFixed02)},
-            {"03", typeof(InfoRecordFixed03)},
-            {"04", typeof(InfoRecordFixed04)},
-            {"05", typeof(InfoRecordFixed05)},
-            {"10", typeof(InfoRecordFixed10)},
-            {"11", typeof(InfoRecordFixed11)},
-            {"12", typeof(InfoRecordFixed12)},
-            {"13", typeof(InfoRecordFixed13)},
-            {"14", typeof(InfoRecordFixed14)},
-            {"15", typeof(InfoRecordFixed15)},
-            {"16", typeof(InfoRecordFixed16)}
-        };
-
         private readonly InfoStartMapper _infoStartMapper = new InfoStartMapper();
         private readonly InfoEndMapper _infoEndMapper = new InfoEndMapper();
         private readonly InfoSectionStartMapper _infoSectionStartMapper = new InfoSectionStartMapper();
@@ -58,7 +41,7 @@ namespace FlatFileGenerator.FileReader.Business
             var result = engine.ReadStream(new StreamReader(payload, ParserHelperBase.GetEncoding(DocumentType.NetsIs)));
             if (result.Length == 0)
             {
-                var exception = new Exception("Fejl - Formatet er ikke Nets IS!");
+                var exception = new ArgumentException("Fejl - Formatet er ikke Nets IS!");
                 throw exception;
             }
             if (engine.ErrorManager.HasErrors)
@@ -78,68 +61,68 @@ namespace FlatFileGenerator.FileReader.Business
 
             foreach (var record in result)
             {
-                var type = NetsIsParserHelper.GetRecordType((NetsBase)record);
+                var type = NetsIsParserHelper.NetsRecordTypeDictionary.GetValueOrDefault(record.GetType());
                 switch (type)
                 {
-                    case IsFixedRecordType.IsStartRecord:
-                        netsModel = NetsIsParserHelper.GetInfoStart(record, _infoStartMapper);
+                    case NetsIsRecordType.StartRecord:
+                        netsModel = _infoStartMapper.GetRecord(record);
                         break;
-                    case IsFixedRecordType.SectionStartRecord:
-                        var sectionStart = NetsIsParserHelper.GetInfoSectionStart(record, _infoSectionStartMapper);
+                    case NetsIsRecordType.SectionStart:
+                        var sectionStart = _infoSectionStartMapper.GetRecord(record);
                         sectionStart.InfoStartId = netsModel.Id;
                         netsModel.InfoSectionStartRecords.Add(sectionStart);
                         currentSection = sectionStart;
                         break;
-                    case IsFixedRecordType.IsRecordFixed00:
-                        var infoRecord = NetsIsParserHelper.GetInfoRecord00(record, _infoRecord00Mapper);
+                    case NetsIsRecordType.Record00:
+                        var infoRecord = _infoRecord00Mapper.GetRecord(record);
                         infoRecord.InfoSectionStartId = currentSection.Id;
                         currentRecord00 = infoRecord;
                         currentSection.Record00Records.Add(currentRecord00);
                         break;
-                    case IsFixedRecordType.IsRecordFixed01:
-                        var record01 = NetsIsParserHelper.GetInfoRecord01(record, _infoRecord01Mapper);
+                    case NetsIsRecordType.Record01:
+                        var record01 = _infoRecord01Mapper.GetRecord(record);
                         record01.InfoRecord00Id = currentRecord00.Id;
                         currentRecord00.InfoRecord01.Add(record01);
                         break;
-                    case IsFixedRecordType.IsRecordFixed02:
-                        var record02 = NetsIsParserHelper.GetInfoRecord02(record, _infoRecord02Mapper);
+                    case NetsIsRecordType.Record02:
+                        var record02 = _infoRecord02Mapper.GetRecord(record);
                         record02.InfoRecord00Id = currentRecord00.Id;
                         currentRecord00.InfoRecord02.Add(record02);
                         break;
-                    case IsFixedRecordType.IsRecordFixed03:
-                        var record03 = NetsIsParserHelper.GetInfoRecord03(record, _infoRecord03Mapper);
+                    case NetsIsRecordType.Record03:
+                        var record03 = _infoRecord03Mapper.GetRecord(record);
                         record03.InfoRecord00Id = currentRecord00.Id;
                         currentRecord00.InfoRecord03.Add(record03);
                         break;
-                    case IsFixedRecordType.IsRecordFixed04:
-                        var record04 = NetsIsParserHelper.GetInfoRecord04(record, _infoRecord04Mapper);
+                    case NetsIsRecordType.Record04:
+                        var record04 = _infoRecord04Mapper.GetRecord(record);
                         record04.InfoRecord00Id = currentRecord00.Id;
                         currentRecord00.InfoRecord04.Add(record04);
                         break;
-                    case IsFixedRecordType.IsRecordFixed05:
-                        var record05 = NetsIsParserHelper.GetInfoRecord05(record, _infoRecord05Mapper);
+                    case NetsIsRecordType.Record05:
+                        var record05 = _infoRecord05Mapper.GetRecord(record);
                         record05.InfoRecord00Id = currentRecord00.Id;
                         currentRecord00.InfoRecord05.Add(record05);
                         break;
-                    case IsFixedRecordType.IsRecordFixed10:
-                        var record10 = NetsIsParserHelper.GetInfoRecord10(record, _infoRecord10Mapper);
+                    case NetsIsRecordType.Record10:
+                        var record10 = _infoRecord10Mapper.GetRecord(record);
                         record10.InfoRecord00Id = currentRecord00.Id;
                         currentRecord00.InfoRecord10.Add(record10);
                         break;
-                    case IsFixedRecordType.IsRecordFixed11:
-                    case IsFixedRecordType.IsRecordFixed12:
-                    case IsFixedRecordType.IsRecordFixed13:
-                    case IsFixedRecordType.IsRecordFixed14:
-                    case IsFixedRecordType.IsRecordFixed15:
-                    case IsFixedRecordType.IsRecordFixed16:
+                    case NetsIsRecordType.Record11:
+                    case NetsIsRecordType.Record12:
+                    case NetsIsRecordType.Record13:
+                    case NetsIsRecordType.Record14:
+                    case NetsIsRecordType.Record15:
+                    case NetsIsRecordType.Record16:
                         break;
-                    case IsFixedRecordType.SectionEndRecord:
-                        var sectionEnd = NetsIsParserHelper.GetSectionEnd(record, _infoSectionEndMapper);
+                    case NetsIsRecordType.SectionEnd:
+                        var sectionEnd = _infoSectionEndMapper.GetRecord(record);
                         sectionEnd.InfoSectionStartId = currentSection.Id;
                         currentSection.InfoSectionEnd.Add(sectionEnd);
                         break;
-                    case IsFixedRecordType.IsEndRecord:
-                        var infoend = NetsIsParserHelper.GetInfoEnd(record, _infoEndMapper);
+                    case NetsIsRecordType.EndRecord:
+                        var infoend = _infoEndMapper.GetRecord(record);
                         infoend.InfoStartId = netsModel.Id;
                         netsModel.InfoEnd.Add(infoend);
                         break;
@@ -169,5 +152,22 @@ namespace FlatFileGenerator.FileReader.Business
                 _ => throw new ArgumentOutOfRangeException(transType)
             };
         }
+
+        private static readonly Dictionary<string, Type> InfoRecordDictionary = new Dictionary<string, Type>
+        {
+            {"00", typeof(InfoRecordFixed00)},
+            {"01", typeof(InfoRecordFixed01)},
+            {"02", typeof(InfoRecordFixed02)},
+            {"03", typeof(InfoRecordFixed03)},
+            {"04", typeof(InfoRecordFixed04)},
+            {"05", typeof(InfoRecordFixed05)},
+            {"10", typeof(InfoRecordFixed10)},
+            {"11", typeof(InfoRecordFixed11)},
+            {"12", typeof(InfoRecordFixed12)},
+            {"13", typeof(InfoRecordFixed13)},
+            {"14", typeof(InfoRecordFixed14)},
+            {"15", typeof(InfoRecordFixed15)},
+            {"16", typeof(InfoRecordFixed16)}
+        };
     }
 }

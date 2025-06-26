@@ -15,9 +15,16 @@ namespace FlatFileGenerator.FileReader.Business.Mappers
             _mapper = config.CreateMapper();
         }
         
-        public T2 GetRecord(T1 record)
+        public T2 Map(T1 record)
         {
             var result = _mapper.Map<T1, T2>(record);
+            return result;
+        }
+
+        public T2 GetRecord(object baseRecord)
+        {
+            var textRecord = (T1) baseRecord;
+            var result = Map(textRecord);
             return result;
         }
     }

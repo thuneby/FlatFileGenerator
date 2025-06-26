@@ -28,8 +28,8 @@ namespace FlatFileGenerator.FileReader.Business
                 throw exception;
             }
 
-            var modelRecords = recordList.Select(textMapper.GetRecord).ToList();
-            var receiptDetails = modelRecords.Select(recordMapper.GetRecord).ToList();
+            var modelRecords = recordList.Select(textMapper.Map).ToList();
+            var receiptDetails = modelRecords.Select(recordMapper.Map).ToList();
             return receiptDetails;
         }
     }

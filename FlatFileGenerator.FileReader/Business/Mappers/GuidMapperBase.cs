@@ -20,5 +20,12 @@ namespace FlatFileGenerator.FileReader.Business.Mappers
             var result = Mapper.Map<T1, T2>(record);
             return result;
         }
+
+        public T2 Map(T1 record)
+        {
+            var result = Mapper.Map<T1, T2>(record);
+            return result;
+        }
+
     }
 }
