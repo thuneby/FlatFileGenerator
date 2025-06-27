@@ -15,7 +15,7 @@ namespace FlatFileGenerator.Core.Models
         [DisplayFormat(DataFormatString = "{0:dd-MM-yyyy}")]
         public DateTime ToDate { get; set; }
 
-        [StringLength(10)]
+        [StringLength(11)]
         [Display(Name = "Cpr")]
         public string Cpr { get; set; } = "";
 

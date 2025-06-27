@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatFileGenerator.FileReade
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatFileGenerator.Utilities", "FlatFileGenerator.Utilities\FlatFileGenerator.Utilities.csproj", "{36679D2E-D69D-4086-A6E2-0D5A284529A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlatFileGenerator.DataGenerator", "FlatFileGenerator.DataGenerator\FlatFileGenerator.DataGenerator.csproj", "{009EC9C6-77D2-4E3E-AA47-D41E09F244FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{36679D2E-D69D-4086-A6E2-0D5A284529A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36679D2E-D69D-4086-A6E2-0D5A284529A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36679D2E-D69D-4086-A6E2-0D5A284529A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{009EC9C6-77D2-4E3E-AA47-D41E09F244FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{009EC9C6-77D2-4E3E-AA47-D41E09F244FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{009EC9C6-77D2-4E3E-AA47-D41E09F244FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{009EC9C6-77D2-4E3E-AA47-D41E09F244FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

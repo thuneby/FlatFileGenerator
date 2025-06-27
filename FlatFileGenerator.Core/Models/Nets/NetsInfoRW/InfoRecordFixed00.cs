@@ -38,8 +38,10 @@ namespace FlatFileGenerator.Core.Models.Nets.NetsInfoRW
         [FieldFixedLength(12)]
         [FieldOptional]
         public string SPEC_BLB;
-        [FieldFixedLength(2)]
+        [FieldFixedLength(1200)]
+        [FieldValueDiscarded]
         [FieldOptional]
         public string BLANKE;
+
     }
 }

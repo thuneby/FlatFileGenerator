@@ -1,0 +1,44 @@
+﻿using FlatFileGenerator.Core.Models;
+
+namespace FlatFileGenerator.DataGenerator.Business
+{
+    public class ReceiptDetailGenerator
+    {
+        private static readonly DateTime Today = DateTime.Today;
+        private readonly DateTime _firstOfMonth = new DateTime(Today.Year, Today.Month, 1);
+        private readonly DateTime _lastOfMonth = GetLastOfMonth(Today);
+        
+        private ReceiptDetail GenerateReceiptDetail()
+        {
+            var today = DateTime.Today;
+
+            var r = new ReceiptDetail
+            {
+                ReceivedDate = DateTime.Today,
+                Amount = AmountGenerator.GetAmount(),
+                Cpr = CprGenerator.GetCprModulus(true),
+                Cvr = CprGenerator.GetCvr(),
+                FromDate = _firstOfMonth,
+                ToDate = _lastOfMonth,
+                PaymentDate = Today.AddDays(7),
+                ReceiptType = ReceiptType.Payment
+            };
+            return r;
+        }
+
+        public List<ReceiptDetail> GenerateReceiptDetails(int count = 100)
+        {
+            var list = new List<ReceiptDetail>();
+            for (var i = 0; i < count; i++)
+            {
+                list.Add(GenerateReceiptDetail());
+            }
+            return list;
+        }
+
+        private static DateTime GetLastOfMonth(DateTime date)
+        {
+            return new DateTime(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+        }
+    }
+}

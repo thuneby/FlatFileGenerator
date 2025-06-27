@@ -28,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FlatFileGenerator.Core\FlatFileGenerator.Core.csproj" />
     <ProjectReference Include="..\FlatFileGenerator.DataAccess\FlatFileGenerator.DataAccess.csproj" />
+    <ProjectReference Include="..\FlatFileGenerator.DataGenerator\FlatFileGenerator.DataGenerator.csproj" />
     <ProjectReference Include="..\FlatFileGenerator.FileReader\FlatFileGenerator.FileReader.csproj" />
     <ProjectReference Include="..\FlatFileGenerator.FileWriter\FlatFileGenerator.FileWriter.csproj" />
     <ProjectReference Include="..\FlatFileGenerator.Utilities\FlatFileGenerator.Utilities.csproj" />

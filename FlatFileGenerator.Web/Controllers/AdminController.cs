@@ -1,14 +1,9 @@
 ﻿using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.DataAccess.Repositories;
+using FlatFileGenerator.DataGenerator.Business;
 using FlatFileGenerator.FileWriter.Business;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-using System.Reflection.Metadata;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using FlatFileGenerator.FileReader.Business;
 
 namespace FlatFileGenerator.Web.Controllers
@@ -79,6 +74,12 @@ namespace FlatFileGenerator.Web.Controllers
         }
 
         [HttpGet("[action]")]
+        public IActionResult Generate()
+        {
+            return View();
+        }
+
+        [HttpGet("[action]")]
         public IActionResult Export()
         {
             return View();
@@ -104,6 +105,16 @@ namespace FlatFileGenerator.Web.Controllers
             var success = await writer.WriteAsync(receiptDetails, fileName, filePath);
 
             return new ObjectResult("Export successful!");
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GenerateReceiptDetails(int amount = 100)
+        {
+            var generator = new ReceiptDetailGenerator();
+            var reciptDetails = generator.GenerateReceiptDetails(amount);
+            await repository.AddRange(reciptDetails);
+
+            return RedirectToAction("Index", "ReceiptDetail");
         }
     }
 }
