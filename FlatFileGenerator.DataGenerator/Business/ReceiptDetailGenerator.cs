@@ -18,10 +18,12 @@ namespace FlatFileGenerator.DataGenerator.Business
                 Amount = AmountGenerator.GetAmount(),
                 Cpr = CprGenerator.GetCprModulus(true),
                 Cvr = CprGenerator.GetCvr(),
+                PersonFullName = NameGenerator.GetName(),
                 FromDate = _firstOfMonth,
                 ToDate = _lastOfMonth,
                 PaymentDate = Today.AddDays(7),
-                ReceiptType = ReceiptType.Payment
+                ReceiptType = ReceiptType.Payment,
+                PaymentReference = "INFO-OVF"
             };
             return r;
         }
