@@ -141,6 +141,7 @@ namespace FlatFileGenerator.FileReader.Business
                 Parallel.ForEach(startRecord.Record00Records, record =>
                 {
                     var receiptDetail = receiptDetailMapper.Map(record);
+                    receiptDetail.PaymentDate = ConversionHelper.ParseDate(startRecord.INDBET_DTO);
                     if (receiptDetail != null)
                     {
                         receiptDetails.Add(receiptDetail);

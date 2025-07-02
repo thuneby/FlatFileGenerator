@@ -28,8 +28,6 @@ namespace FlatFileGenerator.FileReader.Business.Mappers.ReceiptDetailMappers
                     opt => opt.MapFrom(src => ConversionHelper.ParseDate(src.PERIODE_FRA)))
                 .ForMember(dest => dest.ToDate, opt => opt.MapFrom(src => ConversionHelper.ParseDate(src.PERIODE_TIL)))
                 .ForMember(dest => dest.PersonFullName, opt => opt.MapFrom(src => GetName(src)))
-                .ForMember(dest => dest.PaymentDate,
-                    opt => opt.MapFrom(src => ConversionHelper.ParseDate(src.InfoSectionStart.INDBET_DTO)))
                 .ForMember(dest => dest.TotalContributionRate,
                     opt => opt.MapFrom(src => GetTotalContributionRate(src)))
                 .ForMember(dest => dest.ContributionRateFromDate,
