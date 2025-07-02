@@ -1,4 +1,5 @@
-﻿using FlatFileGenerator.Core.Models;
+﻿using EFCore.BulkExtensions;
+using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.DataAccess.Interfaces;
 using FlatFileGenerator.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
@@ -37,8 +38,24 @@ namespace FlatFileGenerator.DataAccess.Repositories
         {
             if (entities == null || !entities.Any())
                 throw new ArgumentException("No entities to add");
-            await context.AddRangeAsync(entities);
-            await context.SaveChangesAsync();
+            if (entities.Count() <= 100)
+            {
+                await context.AddRangeAsync(entities);
+                await context.SaveChangesAsync();
+                return;
+            }
+            await using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                await context.BulkInsertAsync(entities.ToList());
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error adding entities");
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public void Delete(Guid id)
