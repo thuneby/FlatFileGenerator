@@ -1,4 +1,5 @@
-﻿using FlatFileGenerator.Core.Models;
+﻿using System.Collections.Concurrent;
+using FlatFileGenerator.Core.Models;
 
 namespace FlatFileGenerator.DataGenerator.Business
 {
@@ -30,12 +31,13 @@ namespace FlatFileGenerator.DataGenerator.Business
 
         public List<ReceiptDetail> GenerateReceiptDetails(int count = 100)
         {
-            var list = new List<ReceiptDetail>();
-            for (var i = 0; i < count; i++)
+            var bag = new ConcurrentBag<ReceiptDetail>();
+
+            Parallel.For(0, count, i =>
             {
-                list.Add(GenerateReceiptDetail());
-            }
-            return list;
+                bag.Add(GenerateReceiptDetail());
+            });
+            return bag.ToList();
         }
 
         private static DateTime GetLastOfMonth(DateTime date)

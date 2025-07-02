@@ -14,8 +14,20 @@ namespace FlatFileGenerator.FileReader.Business.Helpers
             return result / 100;
         }
 
+        public static decimal GetDecimal100(string inputString, string sign)
+        {
+            var success = decimal.TryParse(inputString, out var result);
+            if (!success)
+                return 0M;
+            if (result == 0M)
+                return result;
+            return sign == "-" || sign == "2" ? -result / 100 : result / 100;
+        }
+
         public static DateTime ParseDate(string dateString)
         {
+            if (dateString == "00000000")
+                return GetMinDateTime();
             try
             {
                 return DateTime.ParseExact(dateString, "yyyyMMdd",
@@ -35,6 +47,13 @@ namespace FlatFileGenerator.FileReader.Business.Helpers
         private static DateTime GetMinDateTime()
         {
             return new DateTime(1900, 1, 1);
+        }
+
+        public static string CprHelper(string textCpr) 
+        {
+            if (textCpr != null && textCpr.Length > 9)
+                textCpr = textCpr.Substring(0, 6) + "-" + textCpr.Substring(6, 4);
+            return textCpr;
         }
     }
 }

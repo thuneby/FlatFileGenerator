@@ -16,7 +16,7 @@ namespace FlatFileGenerator.DataAccess.Repositories
 
         public async Task<IEnumerable<T1>> GetList(int take = 100)
         {
-            return await context.Set<T1>().ToListAsync();
+            return await context.Set<T1>().Take(take).ToListAsync();
         }
 
         public T1? Get(Guid id)

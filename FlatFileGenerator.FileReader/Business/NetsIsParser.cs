@@ -3,8 +3,11 @@ using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.Core.Models.Nets.NetsInfo;
 using FlatFileGenerator.Core.Models.Nets.NetsInfoRW;
 using FlatFileGenerator.FileReader.Business.Helpers;
-using FlatFileGenerator.FileReader.Business.Mappers;
+using FlatFileGenerator.FileReader.Business.Mappers.ReceiptDetailMappers;
+using FlatFileGenerator.FileReader.Business.Mappers.TextMappers;
 using FlatFileGenerator.FileReader.Interfaces;
+using System.Collections.Concurrent;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FlatFileGenerator.FileReader.Business
 {
@@ -131,7 +134,26 @@ namespace FlatFileGenerator.FileReader.Business
                 }
             }
 
-            var receiptDetails = new HashSet<ReceiptDetail>();
+            var receiptDetails = new ConcurrentBag<ReceiptDetail>();
+            var receiptDetailMapper = new InfoRecordMapper();
+            Parallel.ForEach(netsModel.InfoSectionStartRecords, startRecord =>
+            {
+                Parallel.ForEach(startRecord.Record00Records, record =>
+                {
+                    var receiptDetail = receiptDetailMapper.Map(record);
+                    if (receiptDetail != null)
+                    {
+                        receiptDetails.Add(receiptDetail);
+                    }
+                });
+            });
+            if (!string.IsNullOrWhiteSpace(netsModel.LEV_DTO))
+            {
+                Parallel.ForEach(receiptDetails, receiptDetail =>
+                {
+                    receiptDetail.SubmissionDate = ConversionHelper.ParseDate(netsModel.LEV_DTO);
+                });
+            }
             return receiptDetails;
         }
 
@@ -169,5 +191,12 @@ namespace FlatFileGenerator.FileReader.Business
             {"15", typeof(InfoRecordFixed15)},
             {"16", typeof(InfoRecordFixed16)}
         };
+
+        private static DateTime? GetSubmíssionDate(InfoRecord00 record)
+        {
+            var date = record.InfoSectionStart.InfoStart.LEV_DTO;
+            return string.IsNullOrWhiteSpace(date) ? DateTime.Today : ConversionHelper.ParseDate(date);
+        }
+
     }
 }

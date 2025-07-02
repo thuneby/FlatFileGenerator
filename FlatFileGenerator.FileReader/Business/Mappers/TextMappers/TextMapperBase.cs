@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using FlatFileGenerator.Core.Models;
 
-namespace FlatFileGenerator.FileReader.Business.Mappers
+namespace FlatFileGenerator.FileReader.Business.Mappers.TextMappers
 {
     public class TextMapperBase<T1, T2>
         where T1 : TextModelBase

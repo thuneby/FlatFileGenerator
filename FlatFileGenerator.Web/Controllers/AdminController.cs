@@ -3,8 +3,8 @@ using FlatFileGenerator.DataAccess.Repositories;
 using FlatFileGenerator.DataGenerator.Business;
 using FlatFileGenerator.FileWriter.Business;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using FlatFileGenerator.FileReader.Business;
+using FlatFileGenerator.Utilities.Files;
 
 namespace FlatFileGenerator.Web.Controllers
 {
@@ -22,19 +22,13 @@ namespace FlatFileGenerator.Web.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> UploadFile(IFormFile file, int type)
+        public async Task<IActionResult> UploadFile(IFormFile? file, int type, string fileName , string filePath)
         {
-            if (file.Length is <= 0 or > long.MaxValue)
+            if (file == null || file.Length is <= 0)
             {
-                ModelState.AddModelError("file", "File is empty or too large.");
-                return View("Index");
-            }
-
-            var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString();
-            if (string.IsNullOrEmpty(fileName))
-            {
-                ModelState.AddModelError("file", "Invalid file type. Please upload a .txt file.");
-                return View("Index");
+                var errorMessage = "File is empty or too large.";
+                ModelState.AddModelError("file", errorMessage);
+                return new ObjectResult(errorMessage);
             }
 
             byte[] content;
@@ -44,33 +38,51 @@ namespace FlatFileGenerator.Web.Controllers
                 content = reader.ReadBytes((int)file.Length);
             }
 
-            var documentType = (DocumentType) type;
-            var parser = ParserFactory.GetParser(documentType);
-            var filetype = file.ContentType.ToLowerInvariant();
-
-
             try
             {
-                using var payload = new MemoryStream(content);
-                var receiptDetails = (await parser.ParseAsync(payload, documentType)).ToList();
-                if (receiptDetails.Any())
-                {
-                    await repository.AddRange(receiptDetails.ToList());
-                }
-
+                await ParsePayload(content, type);
                 return RedirectToAction("Index", "ReceiptDetail");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("file", $"JSON deserialization error: {ex.Message}");
-                return View("Index");
+                var errorMessage = "Parser error: " + ex.Message;
+                ModelState.AddModelError("file", errorMessage);
+                return new ObjectResult(errorMessage);
+            }
+        }
+
+        private async Task ParsePayload(byte[] content, int type)
+        {
+            var documentType = (DocumentType)type;
+            var parser = ParserFactory.GetParser(documentType);
+            using var payload = new MemoryStream(content);
+            var receiptDetails = (await parser.ParseAsync(payload, documentType)).ToList();
+            if (receiptDetails.Any())
+            {
+                await repository.AddRange(receiptDetails.ToList());
+            }
+        }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> UploadFromDirectory(int type, string fileName, string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(filePath))
+            {
+                var errorMessage = "File name or path missing";
+                ModelState.AddModelError("file", errorMessage);
+                return new ObjectResult(errorMessage);
             }
 
-
-            var result = "File uploaded";
-
-            return new ObjectResult(result);
-
+            try
+            {
+                var content = await FileUtil.ReadFileAsync(fileName, filePath);
+                await ParsePayload(content, type);
+                return RedirectToAction("Index", "ReceiptDetail");
+            }
+            catch (Exception e)
+            {
+                return new ObjectResult(e.Message);
+            }
         }
 
         [HttpGet("[action]")]
@@ -94,7 +106,7 @@ namespace FlatFileGenerator.Web.Controllers
                 return View("Export");
             }
 
-            var receiptDetails = (await repository.GetList()).ToList();
+            var receiptDetails = (repository.GetQueryList()).ToList();
             if (!receiptDetails.Any())
             {
                 ModelState.AddModelError("fileName", "No data available to export.");
@@ -104,17 +116,20 @@ namespace FlatFileGenerator.Web.Controllers
             var writer = WriterFactory.GetWriter((DocumentType)type);
             var success = await writer.WriteAsync(receiptDetails, fileName, filePath);
 
-            return new ObjectResult("Export successful!");
+            if (success) return new ObjectResult("Export successful!");
+            ModelState.AddModelError("fileName", "Failed to write file.");
+            return new ObjectResult("Export failed!");
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> GenerateReceiptDetails(int amount = 100)
+        public async Task<IActionResult> GenerateReceiptDetails(int quantity = 100)
         {
             var generator = new ReceiptDetailGenerator();
-            var reciptDetails = generator.GenerateReceiptDetails(amount);
-            await repository.AddRange(reciptDetails);
+            var receiptDetails = generator.GenerateReceiptDetails(quantity);
+            await repository.AddRange(receiptDetails);
 
             return RedirectToAction("Index", "ReceiptDetail");
         }
+
     }
 }

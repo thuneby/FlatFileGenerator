@@ -1,6 +1,7 @@
 ﻿using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.FileReader.Business.Helpers;
 using FlatFileGenerator.FileReader.Business.Mappers;
+using FlatFileGenerator.FileReader.Business.Mappers.TextMappers;
 using FlatFileGenerator.FileReader.Interfaces;
 
 namespace FlatFileGenerator.FileReader.Business

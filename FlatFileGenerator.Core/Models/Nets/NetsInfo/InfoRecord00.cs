@@ -20,8 +20,7 @@ namespace FlatFileGenerator.Core.Models.Nets.NetsInfo
         [StringLength(30)]
         public string LINIE_TRANSID { get; set; }
 
-        [StringLength(8)]
-        public string AFS_SE_NR { get; set; }
+        [StringLength(8)] public string AFS_SE_NR { get; set; } = "";  
 
         [StringLength(8)]
         public string DL_SE_NR { get; set; }
@@ -35,8 +34,7 @@ namespace FlatFileGenerator.Core.Models.Nets.NetsInfo
         [StringLength(8)]
         public string AFS_AFT_NR_HOS_MODT { get; set; }
 
-        [StringLength(10)]
-        public string KUND_CPR_NR { get; set; }
+        [StringLength(10)] public string KUND_CPR_NR { get; set; } = "";
 
         [StringLength(15)]
         public string KUND_NR_HOS_MODT { get; set; }
@@ -53,8 +51,7 @@ namespace FlatFileGenerator.Core.Models.Nets.NetsInfo
         [StringLength(8)]
         public string PERIODE_TIL { get; set; }
 
-        [StringLength(5)]
-        public string OVERENSKOMSTNR { get; set; }
+        [StringLength(5)] public string OVERENSKOMSTNR { get; set; } = "";
 
         [StringLength(12)]
         public string SPEC_BLB { get; set; }
