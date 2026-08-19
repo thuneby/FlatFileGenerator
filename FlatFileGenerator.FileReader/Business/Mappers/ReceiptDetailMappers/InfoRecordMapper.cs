@@ -22,7 +22,7 @@ namespace FlatFileGenerator.FileReader.Business.Mappers.ReceiptDetailMappers
                 .ForMember(dest => dest.Cvr, opt => opt.MapFrom(src => src.AFS_SE_NR))
                 .ForMember(dest => dest.PaymentReference, opt => opt.MapFrom(src => "INFO-OVF"))
                 .ForMember(dest => dest.ReceivedDate, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.ReceiptType, opt => opt.MapFrom(src => ReceiptType.Payment)) // ToDo
+                .ForMember(dest => dest.ReceiptType, opt => opt.MapFrom(src => GetReceiptType(src)))
                 .ForMember(dest => dest.LaborAgreementNumber, opt => opt.MapFrom(src => src.OVERENSKOMSTNR))
                 .ForMember(dest => dest.FromDate,
                     opt => opt.MapFrom(src => ConversionHelper.ParseDate(src.PERIODE_FRA)))
@@ -89,6 +89,27 @@ namespace FlatFileGenerator.FileReader.Business.Mappers.ReceiptDetailMappers
             }
 
             return ConversionHelper.ParseDate(record02.PENS_BIDRAG_PCT_START_DTO);
+        }
+
+        private static ReceiptType GetReceiptType(InfoRecord00 record)
+        {
+            var record02 = record.InfoRecord02.FirstOrDefault();
+            if (record02 == null || !int.TryParse(record02.PENS_TYPE, out var code))
+            {
+                return ReceiptType.Payment;
+            }
+            return code switch
+            {
+                0 => ReceiptType.Payment,
+                1 => ReceiptType.Supplementory,
+                2 => ReceiptType.Payment,
+                4 => ReceiptType.Volentary,
+                10 => ReceiptType.Payment,
+                13 => ReceiptType.Payment,
+                14 => ReceiptType.Payment,
+                15 => ReceiptType.Savings,
+                _ => ReceiptType.Payment
+            };
         }
 
     }

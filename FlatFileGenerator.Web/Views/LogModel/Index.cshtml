@@ -1,0 +1,30 @@
+﻿@using FlatFileGenerator.Core.Models.Logs.LogModels
+@using NonFactors.Mvc.Grid
+@model IEnumerable<LogModel>
+
+@{
+    ViewData["Title"] = "Logs";
+}
+
+<h1>Logs</h1>
+
+
+@(
+Html
+    .Grid(Model)
+    .Build(columns =>
+    {
+        columns.Add(model => model.LogDate).Formatted("{0: dd-MM-yyyy}"); 
+        columns.Add(model => model.TimeStamp);
+        columns.Add(model => model.LogType).Filterable(GridFilterType.Multi);
+        columns.Add(model => model.PolicyNumber);
+        columns.Add(model => model.Success).Titled("Success").RenderedAs(model => Html.CheckBoxFor(a => model.Success)).Css("text-center");
+        columns.Add(model => model.Message);
+        columns.Add(model => model.DocumentName);
+    })
+    .Filterable()
+    .Pageable()
+    .Sortable()
+    .Empty("Ingen logs fundet")
+    .Css("table-hover")
+)

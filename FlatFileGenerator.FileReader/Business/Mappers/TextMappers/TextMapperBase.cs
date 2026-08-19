@@ -7,17 +7,17 @@ namespace FlatFileGenerator.FileReader.Business.Mappers.TextMappers
         where T1 : TextModelBase
         where T2 : GuidModelBase
     {
-        private readonly IMapper _mapper;
+        protected IMapper Mapper;
 
         protected TextMapperBase()
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<T1, T2>());
-            _mapper = config.CreateMapper();
+            Mapper = config.CreateMapper();
         }
         
         public T2 Map(T1 record)
         {
-            var result = _mapper.Map<T1, T2>(record);
+            var result = Mapper.Map<T1, T2>(record);
             return result;
         }
 

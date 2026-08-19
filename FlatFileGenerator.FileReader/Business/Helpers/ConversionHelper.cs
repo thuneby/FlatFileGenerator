@@ -39,6 +39,21 @@ namespace FlatFileGenerator.FileReader.Business.Helpers
             }
         }
 
+        public static DateTime ParseDate10(string? dateString)
+        {
+            if (string.IsNullOrWhiteSpace(dateString) || dateString == "0000-00-00")
+                return GetMinDateTime();
+            try
+            {
+                return DateTime.ParseExact(dateString, "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None);
+            }
+            catch
+            {
+                return GetMinDateTime();
+            }
+        }
+
         public static bool IsMinDateTime(DateTime date)
         {
             return date == GetMinDateTime();

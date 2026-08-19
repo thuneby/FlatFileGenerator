@@ -1,4 +1,5 @@
 ﻿using FlatFileGenerator.Core.Models;
+using FlatFileGenerator.Core.Models.Logs.LogModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlatFileGenerator.DataAccess.Models
@@ -11,6 +12,8 @@ namespace FlatFileGenerator.DataAccess.Models
         }
 
         public DbSet<ReceiptDetail> ReceiptDetails { get; set; }
+        public DbSet<LogModel> Logs { get; set; }
+        public DbSet<InputFile> InputFiles { get; set; }
 
     }
 }

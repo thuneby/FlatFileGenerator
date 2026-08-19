@@ -2,6 +2,7 @@ using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.DataAccess.Models;
 using FlatFileGenerator.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +12,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<FlatFileContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("FlatFileGenerator.Web")));
+//builder.Services.AddDbContext<FlatFileContext>(options =>
+//    options.UseInMemoryDatabase("FlatFileContext")
+//    .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+
 
 builder.Services.AddScoped<ReceiptDetailRepository>();
+builder.Services.AddScoped<LogModelRepository>();
+builder.Services.AddScoped<InputFileRepository>();
 //builder.Services.AddDatabaseDeveloper
 
 var app = builder.Build();

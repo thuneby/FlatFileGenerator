@@ -8,7 +8,7 @@ using FlatFileGenerator.Utilities.Files;
 
 namespace FlatFileGenerator.Web.Controllers
 {
-    public class AdminController(ReceiptDetailRepository repository) : Controller
+    public class AdminController(ReceiptDetailRepository repository, LogModelRepository logModelRepository, InputFileRepository inputFileRepository) : Controller
     {
         public IActionResult Index()
         {
@@ -38,6 +38,15 @@ namespace FlatFileGenerator.Web.Controllers
                 content = reader.ReadBytes((int)file.Length);
             }
 
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = file.FileName;
+            }
+
+            if (type == (int)DocumentType.ErrorLog)
+            {
+                return await ParseLogFile(content, fileName);
+            }
             try
             {
                 await ParsePayload(content, type);
@@ -61,6 +70,23 @@ namespace FlatFileGenerator.Web.Controllers
             {
                 await repository.AddRange(receiptDetails.ToList());
             }
+        }
+
+        private async Task<IActionResult> ParseLogFile(byte[] content, string fileName) 
+        {
+            var parser = new LogParser();
+            using var payload = new MemoryStream(content);
+            var logModels = (await parser.ParseAsync(payload, DocumentType.ErrorLog)).ToList();
+            if (logModels.Any())
+            {
+                foreach (var model in logModels)
+                {
+                    model.DocumentName = fileName;
+                }
+                await logModelRepository.AddRange(logModels.ToList());
+            }
+            // Process logModels as needed
+            return RedirectToAction("Index", "LogModel");
         }
 
         [HttpPost("[action]")]
@@ -129,6 +155,16 @@ namespace FlatFileGenerator.Web.Controllers
             await repository.AddRange(receiptDetails);
 
             return RedirectToAction("Index", "ReceiptDetail");
+        }
+
+        private InputFile GetInputFile(string fileName, long length, DocumentType documentType)
+        {
+            return new InputFile
+            {
+                FileName = fileName,
+                Size = length/1024,
+                DocumentType = documentType
+            };
         }
 
     }

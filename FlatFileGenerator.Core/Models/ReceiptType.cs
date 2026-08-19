@@ -4,10 +4,8 @@ namespace FlatFileGenerator.Core.Models
 {
     public enum ReceiptType
     {
-        [Display(Name = "Ukendt")]
-        Unknown = 0,
-        [Display(Name = "Præmie")]
-        Payment = 1,
+        [Display(Name = "Arbejdsgiverindbetaling")]
+        Payment = 0,
         [Display(Name = "Indskud")]
         Transfer = 2,
         [Display(Name = "Efterregulering")]
@@ -19,6 +17,12 @@ namespace FlatFileGenerator.Core.Models
         [Display(Name = "Supplerende bidrag")]
         Supplementory = 6,
         [Display(Name = "Supplerende efterregulering")]
-        SupplementoryAdjustment = 7
+        SupplementoryAdjustment = 7,
+        [Display(Name = "Opsparing")]
+        Savings = 15,
+        [Display(Name = "Paragraf 41 overførsel")]
+        P41Transfer = 10,
+        [Display(Name = "Ukendt")]
+        Unknown = 99,
     }
 }

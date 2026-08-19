@@ -1,5 +1,6 @@
 ﻿using FlatFileGenerator.Core.Models.Nets.NetsInfo;
 using FlatFileGenerator.Core.Models;
+using System.Text.RegularExpressions;
 
 namespace FlatFileGenerator.FileWriter.Business.Helpers
 {
@@ -8,7 +9,7 @@ namespace FlatFileGenerator.FileWriter.Business.Helpers
         private const string SystemCode = "IN";
         private const string ZeroDate = "00000000";
         private const string ZeroAmount = "000000000000";
-        private const string ModtPbsNr = "00015733";
+        private const string ModtPbsNr = "01043250";
         public static InfoStart GetInfoStart(string bachnumber, string batchDate)
         {
             var infoStart = new InfoStart
@@ -18,7 +19,7 @@ namespace FlatFileGenerator.FileWriter.Business.Helpers
                 MODT_PBS_TXT = "PBS",
                 LEV_NR = bachnumber,
                 LEV_DTO = batchDate,
-                LEV_SE_NUM = "24260577",
+                LEV_SE_NUM = "19676889",
                 SYSTEM_VERS_NR = "110"
             };
             return infoStart;
@@ -35,7 +36,7 @@ namespace FlatFileGenerator.FileWriter.Business.Helpers
                 MODT_PBS_TXT = "PBS",
                 LEV_NR = bachnumber,
                 LEV_DTO = batchDate,
-                LEV_SE_NUM = "24260577",
+                LEV_SE_NUM = "19676889",
                 SYSTEM_VERS_NR = "110",
                 LEV_TOT_REC_ANT = totalRecords.ToString("D10"),
                 LEV_TOT_SECT_ANT = totalSections.ToString("D10"),
@@ -88,6 +89,7 @@ namespace FlatFileGenerator.FileWriter.Business.Helpers
         public static InfoRecord00 GetInfoRecord00(string bachnumber, InfoSectionStart sectionStart, int record00Count,
             string batchDate, ReceiptDetail transfer)
         {
+            var cpr = Regex.Replace(transfer.Cpr, @"-", "");
             var record00 = new InfoRecord00
             {
                 SYSTEM_KOD = SystemCode,
@@ -99,11 +101,11 @@ namespace FlatFileGenerator.FileWriter.Business.Helpers
                 //REC_ANT = "03",
                 LINIE_TRANSID = "FI" + batchDate + sectionStart.SECT_NR + "00" + record00Count.ToString("D10"),
                 AFS_SE_NR = transfer.Cvr,
-                DL_SE_NR = "24260577",
+                DL_SE_NR = "19676889",
                 KUND_NR_HOS_AFS = transfer.CustomerNumber,
                 MODT_AFD_NR = string.Empty,
                 AFS_AFT_NR_HOS_MODT = string.Empty,
-                KUND_CPR_NR = transfer.Cpr.Trim('-'),
+                KUND_CPR_NR = cpr,
                 KUND_NR_HOS_MODT = transfer.CustomerNumber,
                 INDBET_BLB = ((long)Math.Truncate(Math.Abs(transfer.Amount * 100))).ToString("D12"),
                 INDBET_BLB_FRTFLT = transfer.Amount < 0 ? "-" : "+",

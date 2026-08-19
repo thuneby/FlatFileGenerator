@@ -4,6 +4,7 @@ using FlatFileGenerator.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,13 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlatFileGenerator.Web.Migrations
 {
     [DbContext(typeof(FlatFileContext))]
-    partial class FlatFileContextModelSnapshot : ModelSnapshot
+    [Migration("20251219091715_LogModel")]
+    partial class LogModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -67,15 +70,12 @@ namespace FlatFileGenerator.Web.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("LogDate")
-                        .HasColumnType("Date");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("LogType")
                         .HasColumnType("int");
 
                     b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PolicyNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Success")
