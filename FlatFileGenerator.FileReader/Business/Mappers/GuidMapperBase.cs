@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FlatFileGenerator.Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace FlatFileGenerator.FileReader.Business.Mappers
 {
@@ -7,11 +8,12 @@ namespace FlatFileGenerator.FileReader.Business.Mappers
         where T1 : GuidModelBase
         where T2 : GuidModelBase
     {
-        protected MapperConfiguration MapperConfiguration = new MapperConfiguration(cfg => cfg.CreateMap<T1, T2>());
+        protected MapperConfiguration MapperConfiguration;
         protected IMapper Mapper;
 
-        protected GuidMapperBase()
+        protected GuidMapperBase(ILoggerFactory loggerFactory)
         {
+            MapperConfiguration = new MapperConfiguration(cfg => cfg.CreateMap<T1, T2>(), loggerFactory);
             Mapper = MapperConfiguration.CreateMapper();
         }
 

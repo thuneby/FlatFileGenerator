@@ -9,7 +9,7 @@ namespace FlatFileGenerator.FileReader.Business.Helpers
         {
             return documentType switch
             {
-                DocumentType.NetsIs => Encoding.Default, // 28591?
+                DocumentType.NetsIs => Encoding.GetEncoding(28591),
                 _ => Encoding.UTF8
             };
         }

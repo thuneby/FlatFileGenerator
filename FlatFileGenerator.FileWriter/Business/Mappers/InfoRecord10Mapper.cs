@@ -4,10 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FlatFileGenerator.FileWriter.Business.Mappers
 {
-    internal class InfoStartMapper: NetsIsMapperBase<InfoStart, InfoStartRecord>
+    internal class InfoRecord10Mapper(ILoggerFactory loggerFactory) : NetsIsMapperBase<InfoRecord10, InfoRecordFixed10>(loggerFactory)
     {
-        public InfoStartMapper(ILoggerFactory loggerFactory) : base(loggerFactory)
-        {
-        }
     }
 }

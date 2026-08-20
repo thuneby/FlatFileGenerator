@@ -4,18 +4,30 @@ using FlatFileGenerator.Core.Models.Nets.NetsInfo;
 using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.Core.Models.Nets.NetsInfoRW;
 using FlatFileGenerator.FileWriter.Business.Mappers;
+using Microsoft.Extensions.Logging;
 
 namespace FlatFileGenerator.FileWriter.Business.Helpers
 {
     public class CreateNetsIs
     {
-        private readonly InfoStartMapper _infoStartMapper = new InfoStartMapper();
-        private readonly InfoEndMapper _infoEndMapper = new InfoEndMapper();
-        private readonly InfoSectionStartMapper _infoSectionStartMapper = new InfoSectionStartMapper();
-        private readonly InfoSectionEndMapper _infoSectionEndMapper = new InfoSectionEndMapper();
-        private readonly InfoRecord00Mapper _infoRecord00Mapper = new InfoRecord00Mapper();
-        private readonly InfoRecord01Mapper _infoRecord01Mapper = new InfoRecord01Mapper();
-        private readonly InfoRecord02Mapper _infoRecord02Mapper = new InfoRecord02Mapper();
+        private readonly InfoStartMapper _infoStartMapper;
+        private readonly InfoEndMapper _infoEndMapper;
+        private readonly InfoSectionStartMapper _infoSectionStartMapper;
+        private readonly InfoSectionEndMapper _infoSectionEndMapper;
+        private readonly InfoRecord00Mapper _infoRecord00Mapper;
+        private readonly InfoRecord01Mapper _infoRecord01Mapper;
+        private readonly InfoRecord02Mapper _infoRecord02Mapper;
+
+        public CreateNetsIs(ILoggerFactory loggerFactory)
+        {
+            _infoStartMapper = new InfoStartMapper(loggerFactory);
+            _infoEndMapper = new InfoEndMapper(loggerFactory);
+            _infoSectionStartMapper = new InfoSectionStartMapper(loggerFactory);
+            _infoSectionEndMapper = new InfoSectionEndMapper(loggerFactory);
+            _infoRecord00Mapper = new InfoRecord00Mapper(loggerFactory);
+            _infoRecord01Mapper = new InfoRecord01Mapper(loggerFactory);
+            _infoRecord02Mapper = new InfoRecord02Mapper(loggerFactory);
+        }
 
         public (InfoStart, decimal) CreateNetsModel(List<ReceiptDetail> recordList, string batchNumber,
             string bankAccount)

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FlatFileGenerator.Core.Models;
+using Microsoft.Extensions.Logging;
 
 namespace FlatFileGenerator.FileReader.Business.Mappers.TextMappers
 {
@@ -9,9 +10,9 @@ namespace FlatFileGenerator.FileReader.Business.Mappers.TextMappers
     {
         protected IMapper Mapper;
 
-        protected TextMapperBase()
+        protected TextMapperBase(ILoggerFactory loggerFactory)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<T1, T2>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<T1, T2>(), loggerFactory);
             Mapper = config.CreateMapper();
         }
         

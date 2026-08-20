@@ -2,18 +2,19 @@
 using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.Core.Models.IP.IPModels;
 using FlatFileGenerator.FileReader.Business.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace FlatFileGenerator.FileReader.Business.Mappers.ReceiptDetailMappers
 {
     public class IpRecordMapper: GuidMapperBase<IpRecord, ReceiptDetail>
     {
-        public IpRecordMapper()
+        public IpRecordMapper(ILoggerFactory loggerFactory) : base(loggerFactory)
         {
-            MapperConfiguration = GetMapperConfiguration();
+            MapperConfiguration = GetMapperConfiguration(loggerFactory);
             Mapper = MapperConfiguration.CreateMapper();
         }
 
-        private MapperConfiguration GetMapperConfiguration()
+        private MapperConfiguration GetMapperConfiguration(ILoggerFactory loggerFactory)
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<IpRecord, ReceiptDetail>()
                 .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => ConversionHelper.GetDecimal100(src.Pensionsbidrag)))
@@ -32,6 +33,7 @@ namespace FlatFileGenerator.FileReader.Business.Mappers.ReceiptDetailMappers
                 .ForMember(dest => dest.CustomerNumber, opt => opt.MapFrom(src => src.AfsendersKundenr))
                 .ForMember(dest => dest.SubmissionDate, opt => opt.MapFrom(src => ConversionHelper.ParseDate(src.DatoForDannelse)))
                 .ForMember(dest => dest.EmploymentTerminationDate, opt => opt.MapFrom(src => GetTerminationDate(src.DatoForFratraedelse)))
+                , loggerFactory
                 );
             return config;
         }

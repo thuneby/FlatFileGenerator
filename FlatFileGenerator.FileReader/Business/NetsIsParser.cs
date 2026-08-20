@@ -6,24 +6,24 @@ using FlatFileGenerator.FileReader.Business.Helpers;
 using FlatFileGenerator.FileReader.Business.Mappers.ReceiptDetailMappers;
 using FlatFileGenerator.FileReader.Business.Mappers.TextMappers;
 using FlatFileGenerator.FileReader.Interfaces;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FlatFileGenerator.FileReader.Business
 {
-    public class NetsIsParser: IAsyncParser
+    public class NetsIsParser(ILoggerFactory loggerFactory): IAsyncParser
     {
-        private readonly InfoStartMapper _infoStartMapper = new InfoStartMapper();
-        private readonly InfoEndMapper _infoEndMapper = new InfoEndMapper();
-        private readonly InfoSectionStartMapper _infoSectionStartMapper = new InfoSectionStartMapper();
-        private readonly InfoSectionEndMapper _infoSectionEndMapper = new InfoSectionEndMapper();
-        private readonly InfoRecord00Mapper _infoRecord00Mapper = new InfoRecord00Mapper();
-        private readonly InfoRecord01Mapper _infoRecord01Mapper = new InfoRecord01Mapper();
-        private readonly InfoRecord02Mapper _infoRecord02Mapper = new InfoRecord02Mapper();
-        private readonly InfoRecord03Mapper _infoRecord03Mapper = new InfoRecord03Mapper();
-        private readonly InfoRecord04Mapper _infoRecord04Mapper = new InfoRecord04Mapper();
-        private readonly InfoRecord05Mapper _infoRecord05Mapper = new InfoRecord05Mapper();
-        private readonly InfoRecord10Mapper _infoRecord10Mapper = new InfoRecord10Mapper();
+        private readonly InfoStartMapper _infoStartMapper = new InfoStartMapper(loggerFactory);
+        private readonly InfoEndMapper _infoEndMapper = new InfoEndMapper(loggerFactory);
+        private readonly InfoSectionStartMapper _infoSectionStartMapper = new InfoSectionStartMapper(loggerFactory);
+        private readonly InfoSectionEndMapper _infoSectionEndMapper = new InfoSectionEndMapper(loggerFactory);
+        private readonly InfoRecord00Mapper _infoRecord00Mapper = new InfoRecord00Mapper(loggerFactory);
+        private readonly InfoRecord01Mapper _infoRecord01Mapper = new InfoRecord01Mapper(loggerFactory);
+        private readonly InfoRecord02Mapper _infoRecord02Mapper = new InfoRecord02Mapper(loggerFactory);
+        private readonly InfoRecord03Mapper _infoRecord03Mapper = new InfoRecord03Mapper(loggerFactory);
+        private readonly InfoRecord04Mapper _infoRecord04Mapper = new InfoRecord04Mapper(loggerFactory);
+        private readonly InfoRecord05Mapper _infoRecord05Mapper = new InfoRecord05Mapper(loggerFactory);
+        private readonly InfoRecord10Mapper _infoRecord10Mapper = new InfoRecord10Mapper(loggerFactory);
 
         public async Task<IEnumerable<ReceiptDetail>> ParseAsync(Stream payload, DocumentType documentType)
         {
@@ -135,19 +135,20 @@ namespace FlatFileGenerator.FileReader.Business
             }
 
             var receiptDetails = new ConcurrentBag<ReceiptDetail>();
-            var receiptDetailMapper = new InfoRecordMapper();
-            Parallel.ForEach(netsModel.InfoSectionStartRecords, startRecord =>
+            var receiptDetailMapper = new InfoRecordMapper(loggerFactory);
+            var minimumMapper = new MinimumReceiptDetailMapper(loggerFactory);
+            //Parallel.ForEach(netsModel.InfoSectionStartRecords, startRecord =>
+            foreach (var startRecord in netsModel.InfoSectionStartRecords)
             {
-                Parallel.ForEach(startRecord.Record00Records, record =>
+                //Parallel.ForEach(startRecord.Record00Records, record =>
+                foreach (var record in startRecord.Record00Records)
                 {
-                    var receiptDetail = receiptDetailMapper.Map(record);
-                    receiptDetail.PaymentDate = ConversionHelper.ParseDate(startRecord.INDBET_DTO);
-                    if (receiptDetail != null)
-                    {
-                        receiptDetails.Add(receiptDetail);
-                    }
-                });
-            });
+                    MapReceiptDetail(receiptDetailMapper, record, startRecord, receiptDetails, minimumMapper);
+                }
+                //});
+                //});
+            }
+
             if (!string.IsNullOrWhiteSpace(netsModel.LEV_DTO))
             {
                 Parallel.ForEach(receiptDetails, receiptDetail =>
@@ -155,7 +156,119 @@ namespace FlatFileGenerator.FileReader.Business
                     receiptDetail.SubmissionDate = ConversionHelper.ParseDate(netsModel.LEV_DTO);
                 });
             }
+            return receiptDetails.ToList();
+        }
+
+        private static void MapReceiptDetail(InfoRecordMapper receiptDetailMapper, InfoRecord00 record,
+    InfoSectionStart startRecord, ConcurrentBag<ReceiptDetail> receiptDetails, MinimumReceiptDetailMapper mapper)
+        {
+            var receiptDetail = receiptDetailMapper.Map(record);
+            if (receiptDetail == null)
+                return;
+            receiptDetail.PaymentDate = ConversionHelper.ParseDate(startRecord.INDBET_DTO);
+            var record04 = record.InfoRecord04.FirstOrDefault();
+            if (record.InfoRecord04.FirstOrDefault() != null && (HasValue(record04!.REGU_BLB1)
+                                                                 || HasValue(record04.REGU_BLB2)
+                                                                 || HasValue(record04.REGU_BLB3)))
+            {
+                var adjustments = AddAdjustment(record, receiptDetail, mapper);
+                foreach (var adjustment in adjustments)
+                {
+                    receiptDetails.Add(adjustment);
+                }
+            }
+            //receiptDetail.RawDataJson = JsonSerializer.Serialize(record, options);
+            receiptDetails.Add(receiptDetail);
+        }
+
+        private static List<ReceiptDetail> AddAdjustment(InfoRecord00 record, ReceiptDetail receiptDetail, MinimumReceiptDetailMapper mapper)
+        {
+            var receiptDetails = new List<ReceiptDetail>();
+            var adjustments = GetAdjustments(record.InfoRecord04.First());
+            var count = adjustments.Count;
+            if (count == 0)
+                return receiptDetails;
+            var result = new ReceiptDetail[count];
+            var adjSum = adjustments.Sum(x => x.Amount);
+            var totalAmount = receiptDetail.Amount;
+            for (var i = 0; i < adjustments.Count; i++)
+            {
+                var adjReceipt = mapper.Map(receiptDetail);
+                adjReceipt.Amount = adjustments[i].Amount;
+                adjReceipt.ReceiptType = GetReceiptType(adjustments[i].AdjustmentCode);
+                adjReceipt.FromDate = adjustments[i].FromDate;
+                adjReceipt.ToDate = adjustments[i].ToDate;
+                //adjReceipt.ContributorreceivablevoucherUid = receiptDetail.ContributorreceivablevoucherUid;
+                result[i] = adjReceipt;
+            }
+
+            if (Math.Abs(totalAmount - adjSum) > 0.01M)
+            {
+                receiptDetail.Amount = totalAmount - adjSum; // The amount paid is the total amount, the rest is adjustments
+            }
+            else // The receiptdetail consists of adjustments only. the last adjustment is replaced by the receiptDetail
+            {
+                count--;
+                receiptDetail.Amount = totalAmount + adjustments[count].Amount - adjSum;
+                receiptDetail.ReceiptType = GetReceiptType(adjustments[count].AdjustmentCode);
+                receiptDetail.FromDate = adjustments[count].FromDate;
+                receiptDetail.ToDate = adjustments[count].ToDate;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                receiptDetails.Add(result[i]);
+            }
             return receiptDetails;
+        }
+
+        private static List<Adjustment> GetAdjustments(InfoRecord04 record04)
+        {
+            var adjustments = new List<Adjustment>();
+            if (HasValue(record04.REGU_BLB1))
+            {
+                var adj1 = CreateAdjustment(record04.REGU_BLB1, record04.REGU_FRTFLT1,
+                    record04.REGU_PER_FRA_DTO1, record04.REGU_PER_TIL_DTO1, record04.REGU_KOD1);
+                adjustments.Add(adj1);
+            }
+            if (HasValue(record04.REGU_BLB2))
+            {
+                var adj1 = CreateAdjustment(record04.REGU_BLB2, record04.REGU_FRTFLT2,
+                    record04.REGU_PER_FRA_DTO2, record04.REGU_PER_TIL_DTO2, record04.REGU_KOD2);
+                adjustments.Add(adj1);
+            }
+            if (HasValue(record04.REGU_BLB3))
+            {
+                var adj1 = CreateAdjustment(record04.REGU_BLB3, record04.REGU_FRTFLT3,
+                    record04.REGU_PER_FRA_DTO3, record04.REGU_PER_TIL_DTO3, record04.REGU_KOD3);
+                adjustments.Add(adj1);
+            }
+
+            return adjustments.Count > 0 ? adjustments.OrderBy(x => x.FromDate).ToList() : adjustments;
+        }
+
+        private static Adjustment CreateAdjustment(string amount, string sign, string fromDate, string toDate,
+    string adjustmentCode)
+        {
+            return new Adjustment
+            {
+                Amount = ConversionHelper.GetDecimal100(amount, sign),
+                FromDate = ConversionHelper.ParseDate(fromDate),
+                ToDate = ConversionHelper.ParseDate(toDate),
+                AdjustmentCode = adjustmentCode
+            };
+        }
+
+        private static ReceiptType GetReceiptType(string adjustmentCode)
+        {
+            return adjustmentCode == "02" ? ReceiptType.Transfer : ReceiptType.Adjustment;
+        }
+
+
+        private static bool HasValue(string? amountString)
+        {
+            amountString = amountString?.TrimStart('0');
+            return !string.IsNullOrWhiteSpace(amountString);
         }
 
         private static Type NetsIsSelector(MultiRecordEngine engine, string recordLine)

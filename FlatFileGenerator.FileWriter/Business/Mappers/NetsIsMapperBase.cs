@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FlatFileGenerator.Core.Models;
 using FlatFileGenerator.Core.Models.Nets.NetsInfoRW;
+using Microsoft.Extensions.Logging;
 
 namespace FlatFileGenerator.FileWriter.Business.Mappers
 {
@@ -10,9 +11,9 @@ namespace FlatFileGenerator.FileWriter.Business.Mappers
     {
         private readonly IMapper _mapper;
 
-        protected NetsIsMapperBase()
+        protected NetsIsMapperBase(ILoggerFactory loggerFactory)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<T1, T2>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<T1, T2>(), loggerFactory);
             _mapper = config.CreateMapper();
         }
         

@@ -3,19 +3,20 @@ using FlatFileGenerator.Core.Models.Logs.LogModels;
 using FlatFileGenerator.Core.Models.Logs.LogRW;
 using FlatFileGenerator.FileReader.Business.Helpers;
 using FlatFileGenerator.FileReader.Business.Mappers.TextMappers;
+using Microsoft.Extensions.Logging;
 
 
 namespace FlatFileGenerator.FileReader.Business.Mappers.LogMappers
 {
     public class LogBaseMapper: TextMapperBase<LogBase, LogModel>
     {
-        public LogBaseMapper()
+        public LogBaseMapper(ILoggerFactory loggerFactory) : base(loggerFactory)
         {
-            var config = GetMapperConfiguration();
+            var config = GetMapperConfiguration(loggerFactory);
             Mapper = config.CreateMapper();
         }
 
-        private static MapperConfiguration GetMapperConfiguration()
+        private static MapperConfiguration GetMapperConfiguration(ILoggerFactory loggerFactory)
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<LogBase, LogModel>()
                 .ForMember(dest => dest.LogDate, opt => opt.MapFrom(src => ConversionHelper.ParseDate10(src.Date)))
@@ -26,6 +27,7 @@ namespace FlatFileGenerator.FileReader.Business.Mappers.LogMappers
                 .ForMember(dest => dest.Message, opt => opt.MapFrom(src => GetMessagePart(src.Message)))
                 .ForMember(dest => dest.DocumentId, opt => opt.Ignore())
                 .ForMember(dest => dest.DocumentName, opt => opt.Ignore())
+                , loggerFactory
             );
             return config;
         }

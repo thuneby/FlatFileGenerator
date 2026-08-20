@@ -8,7 +8,7 @@ using FlatFileGenerator.Utilities.Files;
 
 namespace FlatFileGenerator.Web.Controllers
 {
-    public class AdminController(ReceiptDetailRepository repository, LogModelRepository logModelRepository, InputFileRepository inputFileRepository) : Controller
+    public class AdminController(ReceiptDetailRepository repository, LogModelRepository logModelRepository, InputFileRepository inputFileRepository, ILoggerFactory loggerFactory) : Controller
     {
         public IActionResult Index()
         {
@@ -63,7 +63,7 @@ namespace FlatFileGenerator.Web.Controllers
         private async Task ParsePayload(byte[] content, int type)
         {
             var documentType = (DocumentType)type;
-            var parser = ParserFactory.GetParser(documentType);
+            var parser = ParserFactory.GetParser(documentType, loggerFactory);
             using var payload = new MemoryStream(content);
             var receiptDetails = (await parser.ParseAsync(payload, documentType)).ToList();
             if (receiptDetails.Any())
@@ -74,7 +74,7 @@ namespace FlatFileGenerator.Web.Controllers
 
         private async Task<IActionResult> ParseLogFile(byte[] content, string fileName) 
         {
-            var parser = new LogParser();
+            var parser = new LogParser(loggerFactory);
             using var payload = new MemoryStream(content);
             var logModels = (await parser.ParseAsync(payload, DocumentType.ErrorLog)).ToList();
             if (logModels.Any())
@@ -139,7 +139,7 @@ namespace FlatFileGenerator.Web.Controllers
                 return View("Export");
             }
 
-            var writer = WriterFactory.GetWriter((DocumentType)type);
+            var writer = WriterFactory.GetWriter((DocumentType)type, loggerFactory);
             var success = await writer.WriteAsync(receiptDetails, fileName, filePath);
 
             if (success) return new ObjectResult("Export successful!");

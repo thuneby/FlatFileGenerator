@@ -5,16 +5,17 @@ using FlatFileGenerator.Core.Models.Logs.LogRW;
 using FlatFileGenerator.Core.Models.Nets.NetsInfoRW;
 using FlatFileGenerator.FileReader.Business.Helpers;
 using FlatFileGenerator.FileReader.Business.Mappers.LogMappers;
+using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace FlatFileGenerator.FileReader.Business
 {
-    public class LogParser
+    public class LogParser(ILoggerFactory loggerFactory)
     {
         public Task<IEnumerable<LogModel>> ParseAsync(Stream payload, DocumentType documentType)
         {
-            var mapper = new LogBaseMapper();
+            var mapper = new LogBaseMapper(loggerFactory);
             var errors = new HashSet<string>();
             var engine = new MultiRecordEngine(typeof(ErrorLog),
                     typeof(InfoLog), typeof(WarningLog), typeof(JavaErrorLog),
